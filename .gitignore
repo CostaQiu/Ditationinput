@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+# 个人数据：听写记录、运行日志、没成功的录音
+dictate_log.txt
+console_log.txt
+failed/
+# API key
+API
+.env
