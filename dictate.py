@@ -297,16 +297,18 @@ def start_recording():
     """每次按下都重新打开麦克风：设备中途断开过也能接上"""
     global stream, started
     frames.clear()
+    # 浮标先亮：打开麦克风要 0.6-0.9 秒，等它开好再亮，按得短的时候几乎看不到
+    badge.recording(_foreground())
     try:
         stream = sd.InputStream(
             samplerate=SAMPLE_RATE, channels=1, dtype="float32", callback=_on_audio
         )
         stream.start()
         started = time.time()
-        badge.recording(_foreground())
         print("● 录音中…", end="", flush=True)
     except Exception as e:  # 没有麦克风时说一声，下次按下再试
         stream = None
+        badge.hide()
         print(f"打不开麦克风：{e}")
 
 

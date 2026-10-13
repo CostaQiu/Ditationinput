@@ -24,6 +24,7 @@ WS_EX_NOACTIVATE = 0x08000000
 HWND_TOPMOST = -1
 SWP_NOACTIVATE = 0x0010
 SWP_SHOWWINDOW = 0x0040
+SW_SHOWNOACTIVATE = 4
 
 KEY = "#010203"  # 透明色：画在这个颜色上的地方都看不见
 BG = "#1f1f23"
@@ -123,6 +124,12 @@ class Overlay:
         root.mainloop()
 
     def _show_at(self, hwnd: int):
+        # Win+D / "显示桌面" 会把浮标也最小化，之后 SetWindowPos 挪不动它、内容区是 0×0，
+        # 浮标就再也看不见了。每次显示前先还原；SW_SHOWNOACTIVATE 不抢焦点
+        if _user32.IsIconic(self.hwnd):
+            _user32.ShowWindow(self.hwnd, SW_SHOWNOACTIVATE)
+        if hwnd == self.hwnd:  # 刚启动还没点过别处时，前台窗口可能就是浮标自己
+            hwnd = 0
         dpi = _user32.GetDpiForWindow(hwnd) if hwnd else 96
         self.scale = (dpi or 96) / 96
         w, h = int(W * self.scale), int(H * self.scale)
