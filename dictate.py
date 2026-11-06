@@ -102,12 +102,13 @@ GEMINI_SYSTEM = """你在一个语音输入法里工作：说话人按住键说�
 
 
 def _gemini_key() -> str:
-    """环境变量 GEMINI_API_KEY → 本目录的 API 文件 → NotebookO 的 API 文件。
+    """本目录的 API 文件 → NotebookO 的 API 文件 → 环境变量 GEMINI_API_KEY。
+
+    本目录的文件排第一：系统里可能留着一个失效的旧 GEMINI_API_KEY 环境变量（别的程序也在用，
+    不能删），它要是排在前面，放进本目录的新 key 就永远用不上（2026-11-06 踩过）。
 
     API 文件的格式和 NotebookO 的一样：NAME=value 一行一个；没写名字的第一行就是 Gemini 的 key。
     """
-    if os.environ.get("GEMINI_API_KEY"):
-        return os.environ["GEMINI_API_KEY"].strip()
     for f in (HERE / "API", Path(r"C:\NotebookO\API")):
         try:
             lines = f.read_text(encoding="utf-8").splitlines()
@@ -126,7 +127,7 @@ def _gemini_key() -> str:
         key = named.get("GEMINI_API_KEY") or positional
         if key:
             return key
-    return ""
+    return os.environ.get("GEMINI_API_KEY", "").strip()
 
 
 GEMINI_KEY = _gemini_key()
